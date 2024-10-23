@@ -41,6 +41,7 @@ def create_paths_program() -> ArgumentParser:
 	group_paths.add_argument('-s', '--source-paths', help = wording.get('help.source_paths'), action = 'append', default = config.get_str_list('paths.source_paths'))
 	group_paths.add_argument('-t', '--target-path', help = wording.get('help.target_path'), default = config.get_str_value('paths.target_path'))
 	group_paths.add_argument('-o', '--output-path', help = wording.get('help.output_path'), default = config.get_str_value('paths.output_path'))
+	group_paths.add_argument('-od', '--output-directory', help = wording.get('help.output_directory'), default = config.get_str_value('paths.output_directory'))
 	job_store.register_step_keys([ 'source_paths', 'target_path', 'output_path' ])
 	return program
 
@@ -52,7 +53,8 @@ def create_face_detector_program() -> ArgumentParser:
 	group_face_detector.add_argument('--face-detector-size', help = wording.get('help.face_detector_size'), default = config.get_str_value('face_detector.face_detector_size', '640x640'), choices = suggest_face_detector_choices(program))
 	group_face_detector.add_argument('--face-detector-angles', help = wording.get('help.face_detector_angles'), type = int, default = config.get_int_list('face_detector.face_detector_angles', '0'), choices = facefusion.choices.face_detector_angles, nargs = '+', metavar = 'FACE_DETECTOR_ANGLES')
 	group_face_detector.add_argument('--face-detector-score', help = wording.get('help.face_detector_score'), type = float, default = config.get_float_value('face_detector.face_detector_score', '0.5'), choices = facefusion.choices.face_detector_score_range, metavar = create_float_metavar(facefusion.choices.face_detector_score_range))
-	job_store.register_step_keys([ 'face_detector_model', 'face_detector_angles', 'face_detector_size', 'face_detector_score' ])
+	group_face_detector.add_argument('--face-detector-only', help = wording.get('help.face_detector_only'), action='store_true', default = config.get_bool_value('face_detector.face_detector_only'))
+	job_store.register_step_keys([ 'face_detector_model', 'face_detector_angles', 'face_detector_size', 'face_detector_score', 'face-detector-only' ])
 	return program
 
 

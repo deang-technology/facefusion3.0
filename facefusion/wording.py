@@ -98,11 +98,13 @@ WORDING : Dict[str, Any] =\
 		'source_paths': 'choose single or multiple source images or audios',
 		'target_path': 'choose single target image or video',
 		'output_path': 'specify the output image or video within a directory',
+		'output_directory': 'specify the output image or video within a directory',
 		# face detector
 		'face_detector_model': 'choose the model responsible for detecting the faces',
 		'face_detector_size': 'specify the frame size provided to the face detector',
 		'face_detector_angles': 'specify the angles to rotate the frame before detecting faces',
 		'face_detector_score': 'filter the detected faces base on the confidence score',
+		'face_detector_only': 'Only detector face',
 		# face landmarker
 		'face_landmarker_model': 'choose the model responsible for detecting the face landmarks',
 		'face_landmarker_score': 'filter the detected face landmarks base on the confidence score',

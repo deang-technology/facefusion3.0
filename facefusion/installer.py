@@ -42,7 +42,7 @@ def run(program : ArgumentParser) -> None:
 		sys.stdout.write(wording.get('conda_not_activated') + os.linesep)
 		sys.exit(1)
 
-	subprocess.call([ shutil.which('pip'), 'install', '-r', 'requirements.txt', '--force-reinstall' ])
+	subprocess.call([ shutil.which('pip'), 'install', '-r', 'requirements.txt', '-i', 'https://mirrors.aliyun.com/pypi/simple/' ])
 
 	if args.onnxruntime == 'rocm':
 		python_id = 'cp' + str(sys.version_info.major) + str(sys.version_info.minor)

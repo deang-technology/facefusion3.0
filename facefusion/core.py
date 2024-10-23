@@ -1,6 +1,9 @@
+import json
+import os
 import shutil
 import signal
 import sys
+import uuid
 from time import time
 
 import numpy
@@ -12,7 +15,7 @@ from facefusion.content_analyser import analyse_image, analyse_video
 from facefusion.download import conditional_download_hashes, conditional_download_sources
 from facefusion.exit_helper import conditional_exit, graceful_exit, hard_exit
 from facefusion.face_analyser import get_average_face, get_many_faces, get_one_face
-from facefusion.face_selector import sort_and_filter_faces
+from facefusion.face_selector import sort_and_filter_faces, compare_faces
 from facefusion.face_store import append_reference_face, clear_reference_faces, get_reference_faces
 from facefusion.ffmpeg import copy_image, extract_frames, finalize_image, merge_video, replace_audio, restore_audio
 from facefusion.filesystem import filter_audio_paths, is_image, is_video, list_directory, resolve_relative_path
@@ -25,7 +28,7 @@ from facefusion.program_helper import validate_args
 from facefusion.statistics import conditional_log_statistics
 from facefusion.temp_helper import clear_temp_directory, create_temp_directory, get_temp_file_path, get_temp_frame_paths, move_temp_file
 from facefusion.typing import Args, ErrorCode
-from facefusion.vision import get_video_frame, pack_resolution, read_image, read_static_images, restrict_image_resolution, restrict_video_fps, restrict_video_resolution, unpack_resolution
+from facefusion.vision import get_video_frame, pack_resolution, read_image, read_static_images, restrict_image_resolution, restrict_video_fps, restrict_video_resolution, unpack_resolution, read_static_image, count_video_frame_total, normalize_frame_color, write_image
 
 
 def cli() -> None:
@@ -119,6 +122,9 @@ def conditional_process() -> ErrorCode:
 		if not processor_module.pre_process('output'):
 			return 2
 	conditional_append_reference_faces()
+	if state_manager.get_item('face_detector_only'):
+		detect_face()
+		return
 	if is_image(state_manager.get_item('target_path')):
 		return process_image(start_time)
 	if is_video(state_manager.get_item('target_path')):
@@ -436,6 +442,55 @@ def process_video(start_time : float) -> ErrorCode:
 		return 1
 	process_manager.end()
 	return 0
+
+def detect_face() -> None:
+	target_path = state_manager.get_item('target_path')
+	face_frames: [dict] = []
+	if is_image(target_path):
+		source_frame = read_static_image(target_path)
+		faces = get_many_faces(source_frame)
+		for face in faces:
+			face_frames.append({
+				"face": face,
+				"frame": source_frame
+			})
+	elif is_video(target_path):
+		n_frame = count_video_frame_total(target_path)
+		for i in range(0, min(state_manager.get_item('reference_frame_number'), n_frame)):
+			source_frame = get_video_frame(target_path, i)
+			faces = get_many_faces(source_frame)
+			for face in faces:
+				face_frames.append({
+					"face": face,
+					"frame": source_frame
+				})
+	diff_face_frames = []
+	for face_frame in face_frames:
+		existed = False
+		for diff_face_frame in diff_face_frames:
+			if compare_faces(face_frame["face"], diff_face_frame["face"],state_manager.get_item('reference_face_distance')):
+				existed = True
+				break
+		if not existed:
+			diff_face_frames.append(face_frame)
+	output = []
+	for diff_face_frame in diff_face_frames:
+		face = diff_face_frame["face"]
+		frame = diff_face_frame["frame"]
+		start_x, start_y, end_x, end_y = map(int, face.bounding_box)
+		padding_x = int((end_x - start_x) * 0.25)
+		padding_y = int((end_y - start_y) * 0.25)
+		start_x = max(0, start_x - padding_x)
+		start_y = max(0, start_y - padding_y)
+		end_x = max(0, end_x + padding_x)
+		end_y = max(0, end_y + padding_y)
+		crop_vision_frame = frame[start_y:end_y, start_x:end_x]
+		crop_vision_frame = normalize_frame_color(crop_vision_frame)
+		temp_image_path = f"{os.path.join(state_manager.get_item('output_directory'), str(uuid.uuid4()))}.png"
+		write_image(temp_image_path, crop_vision_frame)
+		output.append(temp_image_path)
+	with open(state_manager.get_item('output_path'), "w") as f:
+		json.dump(output, f, ensure_ascii=False, indent=4)
 
 
 def is_process_stopping() -> bool:

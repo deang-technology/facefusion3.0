@@ -39,11 +39,13 @@ def apply_args(args : Args, apply_state_item : ApplyStateItem) -> None:
 	apply_state_item('source_paths', args.get('source_paths'))
 	apply_state_item('target_path', args.get('target_path'))
 	apply_state_item('output_path', args.get('output_path'))
+	apply_state_item('output_directory', args.get('output_directory'))
 	# face detector
 	apply_state_item('face_detector_model', args.get('face_detector_model'))
 	apply_state_item('face_detector_size', args.get('face_detector_size'))
 	apply_state_item('face_detector_angles', args.get('face_detector_angles'))
 	apply_state_item('face_detector_score', args.get('face_detector_score'))
+	apply_state_item('face_detector_only', args.get('face_detector_only'))
 	# face landmarker
 	apply_state_item('face_landmarker_model', args.get('face_landmarker_model'))
 	apply_state_item('face_landmarker_score', args.get('face_landmarker_score'))
