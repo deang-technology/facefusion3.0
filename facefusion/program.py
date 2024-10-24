@@ -43,7 +43,8 @@ def create_paths_program() -> ArgumentParser:
 	group_paths.add_argument('-o', '--output-path', help = wording.get('help.output_path'), default = config.get_str_value('paths.output_path'))
 	group_paths.add_argument('-os', '--output-json-path', help = wording.get('help.output_json_path'), default = config.get_str_value('paths.output_json_path'))
 	group_paths.add_argument('-od', '--output-directory', help = wording.get('help.output_directory'), default = config.get_str_value('paths.output_directory'))
-	job_store.register_step_keys([ 'source_paths', 'target_path', 'output_path', 'output_json_path', 'output_directory' ])
+	group_paths.add_argument('-fs', '--face-paths', help = wording.get('help.face_paths'), action = 'append', default = config.get_str_list('paths.face_paths'))
+	job_store.register_step_keys([ 'source_paths', 'target_path', 'output_path', 'output_json_path', 'output_directory', 'face_paths' ])
 	return program
 
 

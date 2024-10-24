@@ -41,6 +41,7 @@ def apply_args(args : Args, apply_state_item : ApplyStateItem) -> None:
 	apply_state_item('output_path', args.get('output_path'))
 	apply_state_item('output_directory', args.get('output_directory'))
 	apply_state_item('output_json_path', args.get('output_json_path'))
+	apply_state_item('face_paths', args.get('face_paths'))
 	# face detector
 	apply_state_item('face_detector_model', args.get('face_detector_model'))
 	apply_state_item('face_detector_size', args.get('face_detector_size'))

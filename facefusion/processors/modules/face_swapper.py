@@ -1,5 +1,7 @@
 from argparse import ArgumentParser
+from tarfile import tar_filter
 from typing import List, Tuple
+from zipimport import zipimporter
 
 import numpy
 
@@ -14,7 +16,7 @@ from facefusion.face_analyser import get_average_face, get_many_faces, get_one_f
 from facefusion.face_helper import paste_back, warp_face_by_face_landmark_5
 from facefusion.face_masker import create_occlusion_mask, create_region_mask, create_static_box_mask
 from facefusion.face_selector import find_similar_faces, sort_and_filter_faces
-from facefusion.face_store import get_reference_faces
+from facefusion.face_store import get_reference_faces, clear_reference_faces, append_reference_face
 from facefusion.filesystem import filter_image_paths, has_image, in_directory, is_image, is_video, resolve_relative_path, same_file_extension
 from facefusion.inference_manager import get_static_model_initializer
 from facefusion.processors import choices as processors_choices
@@ -336,6 +338,8 @@ def pre_check() -> bool:
 
 
 def pre_process(mode : ProcessMode) -> bool:
+	if state_manager.get_item('face_selector_mode') == "reference_advance":
+		return True
 	if not has_image(state_manager.get_item('source_paths')):
 		logger.error(wording.get('choose_image_source') + wording.get('exclamation_mark'), __name__)
 		return False
@@ -523,6 +527,28 @@ def process_frame(inputs : FaceSwapperInputs) -> VisionFrame:
 		if similar_faces:
 			for similar_face in similar_faces:
 				target_vision_frame = swap_face(source_face, similar_face, target_vision_frame)
+	if state_manager.get_item('face_selector_mode') == "reference_advance":
+		face_paths = state_manager.get_item('face_paths')
+		source_paths = state_manager.get_item('source_paths')
+		if not face_paths or not source_paths:
+			return target_vision_frame
+		if len(face_paths) != len(source_paths):
+			return target_vision_frame
+		for face_path, source_path in zip(face_paths[0].split(","), source_paths[0].split(",")):
+			face_frame = read_static_image(face_path)
+			source_frame = read_static_image(source_path)
+			if face_frame is None or source_frame is None:
+				return target_vision_frame
+			faces = get_many_faces([face_frame])
+			source_faces = get_many_faces([source_frame])
+			if not faces or not source_faces:
+				return target_vision_frame
+			face = faces[0]
+			source_face = source_faces[0]
+			similar_faces = find_similar_faces(many_faces, {"origin": [face]}, state_manager.get_item('reference_face_distance'))
+			if similar_faces:
+				for similar_face in similar_faces:
+					target_vision_frame = swap_face(source_face, similar_face, target_vision_frame)
 	return target_vision_frame
 
 

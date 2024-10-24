@@ -99,7 +99,7 @@ VideoMemoryStrategy = Literal['strict', 'moderate', 'tolerant']
 FaceDetectorModel = Literal['many', 'retinaface', 'scrfd', 'yoloface']
 FaceLandmarkerModel = Literal['many', '2dfan4', 'peppa_wutz']
 FaceDetectorSet = Dict[FaceDetectorModel, List[str]]
-FaceSelectorMode = Literal['many', 'one', 'reference']
+FaceSelectorMode = Literal['many', 'one', 'reference', 'reference_advance']
 FaceSelectorOrder = Literal['left-right', 'right-left', 'top-bottom', 'bottom-top', 'small-large', 'large-small', 'best-worst', 'worst-best']
 FaceMaskType = Literal['box', 'occlusion', 'region']
 FaceMaskRegion = Literal['skin', 'left-eyebrow', 'right-eyebrow', 'left-eye', 'right-eye', 'glasses', 'nose', 'mouth', 'upper-lip', 'lower-lip']
@@ -196,6 +196,7 @@ StateKey = Literal\
 	'target_path',
 	'output_path',
 	'output_directory',
+	'face_paths',
 	'output_json_path',
 	'face_detector_model',
 	'face_detector_size',
@@ -256,6 +257,7 @@ State = TypedDict('State',
 	'output_path' : str,
 	'output_json_path': str,
 	'output_directory': str,
+	'face_paths': List[str],
 	'face_detector_model' : FaceDetectorModel,
 	'face_detector_size' : str,
 	'face_detector_angles' : List[Angle],
