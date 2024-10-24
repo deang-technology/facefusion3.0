@@ -44,6 +44,7 @@ def face_detect(file_url: str, type: str):
 		output_path = f"{directory}/{str(uuid.uuid4())}.json"
 		commands = [sys.executable,
 					'facefusion.py',
+					'headless-run'
 					'--face-detector-only',
 					'-t',
 					file_path,
@@ -100,6 +101,7 @@ def face_swap(target_url: str, face_urls: str, source_urls: str, type: str):
 			source_files.append(source_file)
 
 		commands = [sys.executable,
+					'headless-run',
 					'facefusion.py',
 					'--processors',
 					'face_swapper',
