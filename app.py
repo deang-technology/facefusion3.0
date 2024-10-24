@@ -105,7 +105,7 @@ def face_swap(target_url: str, face_urls: str, source_urls: str, type: str):
 					'headless-run',
 					'--processors',
 					'face_swapper',
-					# 'face_enhancer',
+					'face_enhancer',
 					'-t',
 					target_file,
 					'--log-level',
@@ -119,7 +119,9 @@ def face_swap(target_url: str, face_urls: str, source_urls: str, type: str):
 					'-o',
 					output_file,
 					'--face-enhancer-blend',
-					'100']
+					'100',
+					'--execution-providers',
+					'cuda']
 		print(f"command: {' '.join(commands)}")
 		with open("nohup.out", "a") as log_file:
 			run = subprocess.run(commands, stdout=log_file, stderr=log_file, text=True)
