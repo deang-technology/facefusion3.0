@@ -44,7 +44,7 @@ def face_detect(file_url: str, type: str):
 		output_path = f"{directory}/{str(uuid.uuid4())}.json"
 		commands = [sys.executable,
 					'facefusion.py',
-					'headless-run'
+					'headless-run',
 					'--face-detector-only',
 					'-t',
 					file_path,
