@@ -101,8 +101,8 @@ def face_swap(target_url: str, face_urls: str, source_urls: str, type: str):
 			source_files.append(source_file)
 
 		commands = [sys.executable,
-					'headless-run',
 					'facefusion.py',
+					'headless-run',
 					'--processors',
 					'face_swapper',
 					'face_enhancer',
