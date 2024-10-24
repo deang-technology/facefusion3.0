@@ -99,6 +99,7 @@ WORDING : Dict[str, Any] =\
 		'target_path': 'choose single target image or video',
 		'output_path': 'specify the output image or video within a directory',
 		'output_directory': 'specify the output image or video within a directory',
+		'output_json_path': 'specify the output json within a directory',
 		# face detector
 		'face_detector_model': 'choose the model responsible for detecting the faces',
 		'face_detector_size': 'specify the frame size provided to the face detector',

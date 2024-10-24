@@ -11,7 +11,6 @@ import numpy
 from facefusion import content_analyser, face_classifier, face_detector, face_landmarker, face_masker, face_recognizer, logger, process_manager, state_manager, voice_extractor, wording
 from facefusion.args import apply_args, collect_job_args, reduce_step_args
 from facefusion.common_helper import get_first
-from facefusion.content_analyser import analyse_image, analyse_video
 from facefusion.download import conditional_download_hashes, conditional_download_sources
 from facefusion.exit_helper import conditional_exit, graceful_exit, hard_exit
 from facefusion.face_analyser import get_average_face, get_many_faces, get_one_face
@@ -118,13 +117,12 @@ def processors_pre_check() -> bool:
 
 def conditional_process() -> ErrorCode:
 	start_time = time()
+	if state_manager.get_item('face_detector_only'):
+		return detect_face()
 	for processor_module in get_processors_modules(state_manager.get_item('processors')):
 		if not processor_module.pre_process('output'):
 			return 2
 	conditional_append_reference_faces()
-	if state_manager.get_item('face_detector_only'):
-		detect_face()
-		return
 	if is_image(state_manager.get_item('target_path')):
 		return process_image(start_time)
 	if is_video(state_manager.get_item('target_path')):
@@ -308,8 +306,8 @@ def process_headless(args : Args) -> ErrorCode:
 
 
 def process_image(start_time : float) -> ErrorCode:
-	if analyse_image(state_manager.get_item('target_path')):
-		return 3
+	# if analyse_image(state_manager.get_item('target_path')):
+	# 	return 3
 	# clear temp
 	logger.debug(wording.get('clearing_temp'), __name__)
 	clear_temp_directory(state_manager.get_item('target_path'))
@@ -358,8 +356,8 @@ def process_image(start_time : float) -> ErrorCode:
 
 
 def process_video(start_time : float) -> ErrorCode:
-	if analyse_video(state_manager.get_item('target_path'), state_manager.get_item('trim_frame_start'), state_manager.get_item('trim_frame_end')):
-		return 3
+	# if analyse_video(state_manager.get_item('target_path'), state_manager.get_item('trim_frame_start'), state_manager.get_item('trim_frame_end')):
+	# 	return 3
 	# clear temp
 	logger.debug(wording.get('clearing_temp'), __name__)
 	clear_temp_directory(state_manager.get_item('target_path'))
@@ -443,12 +441,12 @@ def process_video(start_time : float) -> ErrorCode:
 	process_manager.end()
 	return 0
 
-def detect_face() -> None:
+def detect_face() -> ErrorCode:
 	target_path = state_manager.get_item('target_path')
 	face_frames: [dict] = []
 	if is_image(target_path):
 		source_frame = read_static_image(target_path)
-		faces = get_many_faces(source_frame)
+		faces = get_many_faces([source_frame])
 		for face in faces:
 			face_frames.append({
 				"face": face,
@@ -458,7 +456,7 @@ def detect_face() -> None:
 		n_frame = count_video_frame_total(target_path)
 		for i in range(0, min(state_manager.get_item('reference_frame_number'), n_frame)):
 			source_frame = get_video_frame(target_path, i)
-			faces = get_many_faces(source_frame)
+			faces = get_many_faces([source_frame])
 			for face in faces:
 				face_frames.append({
 					"face": face,
@@ -489,8 +487,13 @@ def detect_face() -> None:
 		temp_image_path = f"{os.path.join(state_manager.get_item('output_directory'), str(uuid.uuid4()))}.png"
 		write_image(temp_image_path, crop_vision_frame)
 		output.append(temp_image_path)
-	with open(state_manager.get_item('output_path'), "w") as f:
-		json.dump(output, f, ensure_ascii=False, indent=4)
+	output_json_path = state_manager.get_item('output_json_path')
+	logger.info("output path: " + output_json_path, __name__)
+	logger.info("output" + str(output), __name__)
+	logger.info("output" + json.dumps(output), __name__)
+	with open(output_json_path, 'w') as file:
+		file.write(json.dumps(output))
+	return 0
 
 
 def is_process_stopping() -> bool:
