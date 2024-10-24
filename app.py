@@ -105,7 +105,7 @@ def face_swap(target_url: str, face_urls: str, source_urls: str, type: str):
 					'headless-run',
 					'--processors',
 					'face_swapper',
-					'face_enhancer',
+					# 'face_enhancer',
 					'-t',
 					target_file,
 					'--log-level',
