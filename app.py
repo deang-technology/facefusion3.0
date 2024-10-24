@@ -57,7 +57,7 @@ def face_detect(file_url: str, type: str):
 					'cuda',
 					'--log-level',
 					'debug']
-		logging.info(f"command: {commands}")
+		print(f"command: {commands}")
 		with open("nohup.out", "a") as log_file:
 			run = subprocess.run(commands, stdout=log_file, stderr=log_file, text=True)
 			if run.returncode != 0:
@@ -118,7 +118,7 @@ def face_swap(target_url: str, face_urls: str, source_urls: str, type: str):
 					output_file,
 					'--face-enhancer-blend',
 					'100']
-		logging.info(f"command: {commands}")
+		print(f"command: {commands}")
 		with open("nohup.out", "a") as log_file:
 			run = subprocess.run(commands, stdout=log_file, stderr=log_file, text=True)
 			if run.returncode != 0 or not os.path.exists(output_file):
