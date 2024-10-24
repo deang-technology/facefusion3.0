@@ -483,7 +483,7 @@ def detect_face() -> ErrorCode:
 		end_x = max(0, end_x + padding_x)
 		end_y = max(0, end_y + padding_y)
 		crop_vision_frame = frame[start_y:end_y, start_x:end_x]
-		crop_vision_frame = normalize_frame_color(crop_vision_frame)
+		# crop_vision_frame = normalize_frame_color(crop_vision_frame)
 		temp_image_path = f"{os.path.join(state_manager.get_item('output_directory'), str(uuid.uuid4()))}.png"
 		write_image(temp_image_path, crop_vision_frame)
 		output.append(temp_image_path)
